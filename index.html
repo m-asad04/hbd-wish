@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="main.css" />
+    <link rel="stylesheet" href="2.css" />
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet" />
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.5.2/browser/pixi.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <title>Happy Birthday</title>
+  </head>
+  <body>
+    
+    <div id="gradient"></div>
+    
+    <canvas id="c"></canvas>
+    
+    <div id="start-btn-container" style="display:none;">    
+      <button id="start-btn" aria-label="Enter your dream world">    
+        <span class="btn-text"> Enter Your Dream World </span>    
+      </button>    
+    </div>    
+    
+    <audio id="bg-music" src="src/music.mp3" preload="auto"></audio>
+    
+    <main id="main-content" class="main-content">
+      <div class="fireworks"></div>
+     
+      <div class="top-area">
+        <div class="top-msg">
+          <span class="tw top"></span>
+        </div>
+      </div>
+
+      <div class="center">
+        <button class="btn" id="openBtn" onclick="openModalFancy()">
+          Lets Celebrate 
+        </button>
+      </div>
+
+      <div id="fancyOverlay" class="fancy-overlay" aria-hidden="true">
+        <div id="fancyModal" class="fancy-modal" role="dialog" aria-modal="true" aria-labelledby="fancyTitle" aria-describedby="fancyDesc">
+          <button id="fancyClose" class="fancy-close" aria-label="Close">×</button>
+          <div class="fancy-inner">
+            <h3 id="fancyTitle" class="fancy-title">A little surprise 🎁</h3>
+            <p id="fancyDesc" class="fancy-sub">Made with love just for you.</p>
+
+            <div class="fancy-body">
+              <span id="fancyType" class="tw-modal">
+                Happy Birthday! Wishing you endless smiles & happiness May all your dreams come true 
+              </span>
+            </div>
+
+            <div class="fancy-footer" aria-hidden="true">
+              <span class="dot a"></span>
+              <span class="dot b"></span>
+              <span class="dot c"></span>
+            </div>
+          </div>
+          
+          <button class="Gbtn" id="galleryBtn" onclick="openPhotoGallery()">
+            View Our Moments 
+          </button>
+        </div>
+      </div>
+          
+      <div id="photoGalleryWrap" class="gallery-wrap" aria-hidden="true" style="display:none;">
+        <div class="gallery-stage">
+          <div id="cube" class="cube">
+            <div class="face face1" style="background-image:url('images/photo1.jpeg')"></div>
+            <div class="face face2" style="background-image:url('images/photo2.jpeg')"></div>
+            <div class="face face3" style="background-image:url('images/photo3.jpeg')"></div>
+            <div class="face face4" style="background-image:url('images/photo4.jpeg')"></div>
+          </div>
+        </div>
+
+        <div class="gallery-ui">
+          <button id="prevImg" aria-label="Previous photo">◀</button>
+          <button id="nextImg" aria-label="Next photo">▶</button>
+        </div>
+        <button class="Lbtn" id="LastBtnFinal" onclick="openLastCake()" style="display:none;" aria-label="Final Message">
+          <span class="btn-inner">Final Message</span>
+        </button>
+      </div>
+
+      <div class="lastpage" id="lastPage" style="display: none;">
+        <div class="top-image">
+          <img src="src/cake.png" alt="Cake" />
+        </div>
+        
+        <div class="typewriter">
+          <span id="text"></span>
+        </div>
+        
+        <div class="bday-unique">
+          Wishing You A Day Filled With Joy, Love & Endless Smiles<br />
+          May Your Heart Shine Brighter Than The Candles On Your Cake<br />
+          May Every Moment Today Become A Beautiful Memory Tomorrow<br />
+          ✨ Happy Birthday To You, Stay Blessed & Keep Smiling Always ✨
+        </div>  
+      </div>
+
+      <script>
+        (function(){
+          let index = 0;
+          const total = 4;
+          const cube = document.getElementById('cube');
+          const wrap = document.getElementById('photoGalleryWrap');
+          const topArea = document.querySelector('.top-area');
+          const openBtn = document.getElementById('openBtn'); 
+          const startBtnContainer = document.getElementById('start-btn-container');
+          const prevBtn = document.getElementById('prevImg');
+          const nextBtn = document.getElementById('nextImg');
+
+          function showLastBtn() {
+            const btn = document.getElementById('LastBtnFinal');
+            if (btn) {
+              btn.style.display = "block";
+              btn.style.opacity = "1";
+            }
+          }
+
+          function updateCube() {
+            const angle = index * -90;
+            cube.style.transform = `rotateY(${angle}deg)`;
+          }
+
+          window.openPhotoGallery = function openPhotoGallery(){
+            const fancyOverlay = document.getElementById('fancyOverlay');
+            const fancyModal = document.getElementById('fancyModal');
+            const oldOverlay = document.getElementById('overlay');
+            const oldModal = document.getElementById('modal');   
+            showLastBtn();
+
+            if (fancyModal) fancyModal.classList.remove('show');
+            if (fancyOverlay) {
+              fancyOverlay.classList.remove('show');
+              fancyOverlay.setAttribute('aria-hidden','true');
+            }
+            if (oldModal) oldModal.classList.remove('show');
+            if (oldOverlay) {
+              oldOverlay.classList.remove('show');
+              oldOverlay.setAttribute('aria-hidden','true');
+            }
+            setTimeout(() => {
+              if (fancyOverlay) fancyOverlay.style.display = 'none';
+              if (fancyModal) fancyModal.style.display = 'none';
+              if (oldOverlay) oldOverlay.style.display = 'none';
+              if (oldModal) oldModal.style.display = 'none';
+            }, 450);
+
+            if (topArea) topArea.style.transition = 'opacity .35s ease, transform .35s ease', topArea.style.opacity = 0, topArea.style.transform = 'translateY(-10px)';
+            if (openBtn) openBtn.style.transition = 'opacity .25s ease', openBtn.style.opacity = 0;
+            if (startBtnContainer) startBtnContainer.style.opacity = 0;
+
+            wrap.style.display = 'flex';
+            requestAnimationFrame(()=> { wrap.classList.add('show'); });
+
+            index = 0;
+            updateCube();
+
+            if (nextBtn) nextBtn.focus();
+          };
+
+          function next() {
+            index = (index + 1) % total;
+            updateCube();
+          }
+          function prev() {
+            index = (index - 1 + total) % total;
+            updateCube();
+          }
+
+          if (nextBtn) nextBtn.addEventListener('click', next);
+          if (prevBtn) prevBtn.addEventListener('click', prev);
+
+          let wheelTimeout;
+          if (cube) {
+            cube.addEventListener('wheel', (e) => {
+              e.preventDefault();
+              const delta = e.deltaY || e.deltaX;
+              if (delta > 0) next(); else prev();
+              clearTimeout(wheelTimeout);
+              wheelTimeout = setTimeout(()=>{}, 150);
+            }, { passive:false });
+          }
+
+          let dragging = false;
+          let startX = 0;
+          cube.addEventListener('pointerdown', (e) => {
+            dragging = true;
+            startX = e.clientX;
+            cube.setPointerCapture(e.pointerId);
+          });
+          cube.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            const dx = e.clientX - startX;
+            if (Math.abs(dx) > 40) {
+              if (dx < 0) next(); else prev();
+              startX = e.clientX;
+            }
+          });
+          cube.addEventListener('pointerup', (e) => {
+            dragging = false;
+            try { cube.releasePointerCapture(e.pointerId); } catch(_) {}
+          });
+          cube.addEventListener('pointercancel', ()=> dragging = false);
+
+          let tstartX = 0;
+          cube.addEventListener('touchstart', e => { tstartX = e.touches[0].clientX; }, { passive:true });
+          cube.addEventListener('touchend', e => {
+            const touchX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : 0;
+            const diff = touchX - tstartX;
+            if (Math.abs(diff) > 40) { if (diff < 0) next(); else prev(); }
+          });
+
+          document.addEventListener('keydown', (e) => {
+            if (!wrap.classList.contains('show')) return;
+            if (e.key === 'ArrowRight') next();
+            if (e.key === 'ArrowLeft') prev();
+            if (e.key === 'Escape') {
+              wrap.classList.remove('show');
+              setTimeout(()=> wrap.style.display = 'none', 380);
+              if (topArea) { topArea.style.opacity = 1; topArea.style.transform = 'translateY(0)'; }
+              if (openBtn) { openBtn.style.opacity = 1; openBtn.disabled = false; }
+            }
+          });
+        })();
+      </script>
+    </main>
+
+    <script>
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const MIN_DELAY = 900, MAX_DELAY = 2200;
+      const MIN_SIZE = 20, MAX_SIZE = 38;
+      let heartCount = 0, MAX_HEARTS = 7;
+
+      function spawnHeart() {
+        const heartNS = "http://www.w3.org/2000/svg";
+        const size = Math.random() * (MAX_SIZE - MIN_SIZE) + MIN_SIZE;
+        const startX = Math.random() * (width - size * 1.2);
+        const drift = (Math.random() - 0.5) * width * 0.48;
+        const endX = Math.min(Math.max(startX + drift, 0), width - size * 1.2);
+        const duration = 12 + Math.random() * 3;
+
+        const svg = document.createElementNS(heartNS, "svg");
+        svg.setAttribute("width", size);
+        svg.setAttribute("height", size);
+        svg.setAttribute("class", "heart-outline");
+        svg.style.left = `${startX}px`;
+        svg.style.top = `${height - size}px`;
+        svg.style.background = "transparent";
+        svg.style.border = "none";
+
+        const path = document.createElementNS(heartNS, "path");
+        path.setAttribute("d",
+          `M${size/2},${size*0.85} ` +
+          `C${size*0.1},${size*0.6} ${size*0.1},${size*0.2} ${size/2},${size*0.35} ` +
+          `C${size-size*0.1},${size*0.2} ${size-size*0.1},${size*0.6} ${size/2},${size*0.85}`
+        );
+        path.setAttribute("stroke", "#ff86b6");
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke-width", "2.5");
+        path.setAttribute("filter", "drop-shadow(0 0 12px #ff86b6bb)");
+        svg.appendChild(path);
+
+        document.body.appendChild(svg);
+
+        let startTime = null;
+        function animate(now) {
+          if (!startTime) startTime = now;
+          let t = Math.min((now - startTime) / (duration * 1000), 1);
+          let currentX = startX + (endX - startX) * t;
+          let currentY = height - size - (height + 50) * t;
+          svg.style.transform = `translate(${currentX - startX}px, ${currentY - (height - size)}px) scale(${1 + 0.15 * t})`;
+          svg.style.opacity = 0.18 + 0.65 * (1 - Math.abs(t - 0.55));
+          if (t < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            svg.remove();
+            heartCount--;
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+
+      function flowLoop() {
+        if (heartCount < MAX_HEARTS) {
+          spawnHeart();
+          heartCount++;
+        }
+        const nextDelay = Math.random() * (MAX_DELAY - MIN_DELAY) + MIN_DELAY;
+        setTimeout(flowLoop, nextDelay);
+      }
+      flowLoop();
+    </script>
+    <script src="main.js"></script>
+    <script>
+      \$(document).ready(function () {
+        confetti({
+          particleCount: 200,
+          spread: 120,
+          origin: { y: 0.17 }
+        });
+      });
+    </script>
+       
+    <script>
+      window.addEventListener("load", () => {
+        const DELAY = 5500;
+        const btnContainer = document.getElementById("start-btn-container");
+        const startBtn = document.getElementById("start-btn");
+        const canvas = document.getElementById("c");
+        const main = document.getElementById("main-content");
+        const bgMusic = document.getElementById("bg-music");
+        
+        function showButton(){
+          btnContainer.style.display = "flex";
+          btnContainer.style.opacity = 0;
+          btnContainer.style.transition = "opacity 0.6s ease";
+          requestAnimationFrame(()=> btnContainer.style.opacity = 1);
+        }
+        setTimeout(showButton, DELAY);
+
+        startBtn.addEventListener("click", () => {
+          if (bgMusic) {
+            bgMusic.play().catch(err => {
+              console.log("Autoplay blocked, user interaction required", err);
+            });
+          }
+
+          btnContainer.style.opacity = 0;
+          setTimeout(() => {
+            btnContainer.style.display = "none";
+            if (canvas) canvas.style.display = "none";
+            main.classList.add("show");
+          }, 600); 
+        });
+      });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.x/dist/index.umd.js"></script>
+
+    <script>
+      const container = document.querySelector('.fireworks');
+
+      const fireworks = new Fireworks.default(container, {
+        autoresize: true,
+        opacity: 0.5,
+        acceleration: 1.05,
+        friction: 0.97,
+        gravity: 1.5,
+        particles: 50,
+        trace: 3,
+        explosion: 5,
+        intensity: 30,
+        flickering: 50,
+        hue: { min: 0, max: 360 },
+        delay: { min: 250, max: 250 },
+        rocketsPoint: { min: 50, max: 50 },
+        lineWidth: { explosion: { min: 1, max: 3 }, trace: { min: 1, max: 2 } },
+        brightness: { min: 50, max: 80 },
+        decay: { min: 0.015, max: 0.03 },
+        mouse: { click: false, move: false, max: 1 }
+      });
+
+      fireworks.start();
+    </script>
+      
+    <script>
+      function openLastCake() {
+        const galleryWrap = document.getElementById("photoGalleryWrap");
+        const lastBtn = document.getElementById("LastBtnFinal");
+
+        if (galleryWrap) galleryWrap.style.display = "none";
+        if (lastBtn) lastBtn.style.display = "none";
+
+        const fancyOverlay = document.getElementById("fancyOverlay");
+        if (fancyOverlay) fancyOverlay.style.display = "none";
+
+        const lastPage = document.getElementById("lastPage");
+        if (lastPage) {
+          lastPage.style.display = "flex"; /* Uses flex to vertically center */
+          lastPage.style.opacity = "0";
+          lastPage.style.transition = "opacity 1s ease";
+          requestAnimationFrame(() => {
+            lastPage.style.opacity = "1";
+          });
+        }
+      }
+    </script>
+    <script>
+      (function(){
+        const fullText = "Happy Birthday Asma";
+        const target = document.getElementById('text');
+        const typingDelay = 120;
+        const pauseDelay = 1000;
+        let i = 0;
+
+        function type() {
+          if (i < fullText.length) {
+            target.textContent += fullText.charAt(i);
+            i++;
+            setTimeout(type, typingDelay);
+          } else {
+            setTimeout(erase, pauseDelay);
+          }
+        }
+
+        function erase() {
+          if (i > 0) {
+            target.textContent = fullText.substring(0, i-1);
+            i--;
+            setTimeout(erase, typingDelay);
+          } else {
+            setTimeout(type, typingDelay);
+          }
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', type);
+        } else {
+          type();
+        }
+      })();
+    </script>
+    <script>
+      const fancyOverlay = document.getElementById('fancyOverlay');
+      const fancyModal   = document.getElementById('fancyModal');
+      const fancyClose   = document.getElementById('fancyClose');
+      const fancyType    = document.getElementById('fancyType');
+
+      const LETTER_MS = 30;
+
+      let typingTimer = null;
+      let originalText = null;
+
+      function buildChars() {
+        if (originalText == null) {
+          originalText = (fancyType.dataset.text || fancyType.textContent || "").trim();
+        }
+
+        fancyType.classList.remove('typed');
+        fancyType.innerHTML = "";
+
+        const frag = document.createDocumentFragment();
+        const chars = Array.from(originalText);
+        for (const ch of chars) {
+          if (ch === "\n") {
+            frag.appendChild(document.createElement("br"));
+            continue;
+          }
+          const span = document.createElement("span");
+          span.className = "char";
+          span.textContent = ch;
+          frag.appendChild(span);
+        }
+        fancyType.appendChild(frag);
+      }
+
+      function startTyping(speed = LETTER_MS) {
+        const nodes = fancyType.querySelectorAll(".char");
+        let i = 0;
+
+        if (typingTimer) clearInterval(typingTimer);
+
+        fancyType.classList.remove("typed");
+
+        typingTimer = setInterval(() => {
+          if (i < nodes.length) {
+            nodes[i].classList.add("show");
+            i++;
+          } else {
+            clearInterval(typingTimer);
+            typingTimer = null;
+            fancyType.classList.add("typed");
+          }
+        }, speed);
+      }
+
+      function openModalFancy(){
+        fancyOverlay.classList.add('show');
+        fancyOverlay.setAttribute('aria-hidden','false');
+        requestAnimationFrame(()=> fancyModal.classList.add('show'));
+
+        buildChars();
+        startTyping(LETTER_MS);
+
+        fancyClose.focus();
+      }
+
+      function closeModalFancy(){
+        if (typingTimer) {
+          clearInterval(typingTimer);
+          typingTimer = null;
+        }
+
+        fancyModal.classList.remove('show');
+        setTimeout(()=> {
+          fancyOverlay.classList.remove('show');
+          fancyOverlay.setAttribute('aria-hidden','true');
+
+          if (originalText == null) originalText = fancyType.textContent;
+          fancyType.classList.remove('typed');
+          fancyType.textContent = originalText;
+        }, 420);
+      }
+
+      fancyClose.addEventListener('click', closeModalFancy);
+      fancyOverlay.addEventListener('click', (e) => {
+        if (e.target === fancyOverlay) closeModalFancy();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModalFancy();
+      });
+
+      window.openModalFancy  = openModalFancy;
+      window.closeModalFancy = closeModalFancy;
+    </script>
+    <script>
+      const text = "🎉 Happy Birthday Asma 🎂 Click the button below! 💖";
+      const span = document.querySelector(".tw.top");
+      let index = 0;
+      let isDeleting = false;
+
+      function typeEffect() {
+        if (!isDeleting && index <= text.length) {
+          span.textContent = text.slice(0, index++);
+        } else if (isDeleting && index >= 0) {
+          span.textContent = text.slice(0, index--);
+        }
+
+        if (index === text.length + 1) {
+          isDeleting = true;
+          setTimeout(typeEffect, 1000);
+          return;
+        } else if (index < 0) {
+          isDeleting = false;
+          index = 0;
+        }
+
+        const speed = isDeleting ? 50 : 100;
+        setTimeout(typeEffect, speed);
+      }
+
+      typeEffect();
+    </script>
+    <script src="bg.js"></script>
+  </body>
+</html>
